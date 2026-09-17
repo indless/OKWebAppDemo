@@ -27,11 +27,11 @@ On macOS/Linux, use `cp config.example.php config.php` instead of `Copy-Item`.
 
 Open http://localhost:8080
 
-For a MySQL-free local tryout, set `"driver" => "sqlite"` in `config.php` (see the `path` key in `config.example.php`). Tables and demo users are created on first request.
+For a MySQL-free local tryout, set `"driver" => "sqlite"` in `config.php` (see the `path` key in `config.example.php`). A new SQLite file is created with tables and demo users; later requests do not inspect or rebuild the schema.
 
 To use MySQL locally instead:
 
-1. Create a database and import [`sql/schema.sql`](sql/schema.sql) (optional — the app also creates tables on first run).
+1. Create a database and import [`sql/schema.sql`](sql/schema.sql).
 2. Set `driver` to `mysql` and fill in `host`, `name`, `user`, and `pass` in `config.php`.
 
 ## Hostinger deployment
@@ -39,7 +39,7 @@ To use MySQL locally instead:
 Hostinger shared hosting includes **MySQL/MariaDB**, not SQL Server. Python/Flask/Docker are VPS-only; this demo is PHP so it runs on Web/Cloud plans.
 
 1. In hPanel, open **Databases** and create a MySQL database + user. Note host (`localhost`), database name, username, and password.
-2. Import [`sql/schema.sql`](sql/schema.sql) in phpMyAdmin, or skip this — the app creates tables on first load.
+2. Import [`sql/schema.sql`](sql/schema.sql) in phpMyAdmin. The app does not create or check tables on login, save, or logout.
 3. Copy `config.example.php` to `config.php` and set:
 
 ```php

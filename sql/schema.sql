@@ -50,4 +50,5 @@ CREATE TABLE IF NOT EXISTS attachments (
     CONSTRAINT fk_attachments_inspection FOREIGN KEY (inspection_id) REFERENCES inspections (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Demo users are created automatically on first app load (inspector / inspector123, admin / admin123).
+-- Demo users (inspector / inspector123, admin / admin123) are inserted the first
+-- time the live app connected. Re-importing this file does not recreate them.
