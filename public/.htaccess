@@ -1,6 +1,11 @@
 RewriteEngine On
 RewriteBase /
 
+# Hostinger document root is public_html, so this folder is also reachable as /public/.
+# Send those old URLs to the site root.
+RewriteCond %{THE_REQUEST} \s/+public/ [NC]
+RewriteRule ^(.*)$ /$1 [R=301,L]
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
