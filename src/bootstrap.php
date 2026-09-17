@@ -23,6 +23,18 @@ if (!is_file($autoload)) {
 require $autoload;
 require ROOT . '/src/helpers.php';
 require ROOT . '/src/db.php';
+
+set_exception_handler(static function (Throwable $e): void {
+    http_response_code(500);
+    header('Content-Type: text/html; charset=utf-8');
+    error_log($e->getMessage() . "\n" . $e->getTraceAsString());
+    echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Server error</title></head><body>';
+    echo '<h1>Server error</h1>';
+    echo '<pre>' . htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
+    echo '<p>If this is a database error, check <code>config.php</code> host, database name, user, and password.</p>';
+    echo '</body></html>';
+    exit;
+});
 require ROOT . '/src/auth.php';
 require ROOT . '/src/forms.php';
 require ROOT . '/src/inspections.php';

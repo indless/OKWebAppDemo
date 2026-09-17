@@ -19,18 +19,48 @@ function db(): PDO
         $pdo->exec('PRAGMA foreign_keys = ON');
         migrate_sqlite($pdo);
     } else {
-        $dsn = sprintf(
-            'mysql:host=%s;dbname=%s;charset=%s',
-            $cfg['host'] ?? 'localhost',
-            $cfg['name'] ?? 'inspections',
-            $cfg['charset'] ?? 'utf8mb4'
-        );
-        $pdo = new PDO($dsn, $cfg['user'] ?? '', $cfg['pass'] ?? '', pdo_options());
+        $pdo = mysql_pdo($cfg);
         migrate_mysql($pdo);
     }
 
     seed_demo_users($pdo);
     return $pdo;
+}
+
+function mysql_pdo(array $cfg): PDO
+{
+    if (!in_array('mysql', PDO::getAvailableDrivers(), true)) {
+        throw new RuntimeException(
+            'PHP PDO MySQL driver is missing. In hPanel → PHP Configuration, enable nd_pdo_mysql (or pdo_mysql).'
+        );
+    }
+
+    $name = (string) ($cfg['name'] ?? 'inspections');
+    $charset = (string) ($cfg['charset'] ?? 'utf8mb4');
+    $user = (string) ($cfg['user'] ?? '');
+    $pass = (string) ($cfg['pass'] ?? '');
+    $host = (string) ($cfg['host'] ?? 'localhost');
+    $hosts = [$host];
+    if ($host === 'localhost') {
+        $hosts[] = '127.0.0.1';
+    } elseif ($host === '127.0.0.1') {
+        $hosts[] = 'localhost';
+    }
+
+    $last = null;
+    foreach (array_unique($hosts) as $tryHost) {
+        $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', $tryHost, $name, $charset);
+        try {
+            return new PDO($dsn, $user, $pass, pdo_options());
+        } catch (PDOException $e) {
+            $last = $e;
+            if (!str_contains($e->getMessage(), '2002')) {
+                throw $e;
+            }
+        }
+    }
+
+    throw $last ?? new RuntimeException('Unable to connect to MySQL.');
 }
 
 function pdo_options(): array
@@ -164,20 +194,28 @@ function migrate_inspections_columns(PDO $pdo, string $driver): void
 
     foreach ($types as $column => $type) {
         if (!inspection_has_column($pdo, $driver, $column)) {
-            $pdo->exec("ALTER TABLE inspections ADD COLUMN {$column} {$type}");
+            try {
+                $pdo->exec("ALTER TABLE inspections ADD COLUMN {$column} {$type}");
+            } catch (PDOException) {
+                // Column may already exist under a different information_schema view.
+            }
         }
     }
 
     if ($driver === 'mysql') {
-        $pdo->exec("ALTER TABLE inspections MODIFY COLUMN status ENUM('draft', 'submitted', 'reviewed', 'needs_info') NOT NULL DEFAULT 'draft'");
+        try {
+            $pdo->exec("ALTER TABLE inspections MODIFY COLUMN status ENUM('draft', 'submitted', 'reviewed', 'needs_info') NOT NULL DEFAULT 'draft'");
+        } catch (PDOException) {
+            // Hostinger accounts sometimes cannot ALTER an existing ENUM; CREATE TABLE already has needs_info.
+        }
     }
 }
 
 function inspection_has_column(PDO $pdo, string $driver, string $column): bool
 {
     if ($driver === 'mysql') {
-        $stmt = $pdo->prepare('SHOW COLUMNS FROM inspections LIKE ?');
-        $stmt->execute([$column]);
+        $quoted = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $column);
+        $stmt = $pdo->query('SHOW COLUMNS FROM inspections LIKE ' . $pdo->quote($quoted));
         return (bool) $stmt->fetch();
     }
     foreach ($pdo->query('PRAGMA table_info(inspections)') as $row) {
