@@ -1,6 +1,7 @@
 /config.php
 /storage/app.sqlite
 /storage/app.sqlite-journal
+/storage/.schema_version
 /storage/uploads/*
 !/storage/uploads/.gitkeep
 !/storage/uploads/.htaccess

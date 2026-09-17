@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+const SCHEMA_VERSION = 1;
+
 function db(): PDO
 {
     static $pdo = null;
@@ -15,15 +17,22 @@ function db(): PDO
     if ($driver === 'sqlite') {
         $path = $cfg['path'] ?? (ROOT . '/storage/app.sqlite');
         ensure_dir(dirname($path));
-        $pdo = new PDO('sqlite:' . $path, null, null, pdo_options());
+        $pdo = new PDO('sqlite:' . $path, null, null, pdo_options(false));
         $pdo->exec('PRAGMA foreign_keys = ON');
-        migrate_sqlite($pdo);
     } else {
         $pdo = mysql_pdo($cfg);
-        migrate_mysql($pdo);
     }
 
-    seed_demo_users($pdo);
+    if (!schema_is_current($pdo)) {
+        if ($driver === 'sqlite') {
+            migrate_sqlite($pdo);
+        } else {
+            migrate_mysql($pdo);
+        }
+        mark_schema_current($pdo);
+        seed_demo_users($pdo);
+    }
+
     return $pdo;
 }
 
@@ -51,7 +60,7 @@ function mysql_pdo(array $cfg): PDO
     foreach (array_unique($hosts) as $tryHost) {
         $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', $tryHost, $name, $charset);
         try {
-            return new PDO($dsn, $user, $pass, pdo_options());
+            return new PDO($dsn, $user, $pass, pdo_options(true));
         } catch (PDOException $e) {
             $last = $e;
             if (!str_contains($e->getMessage(), '2002')) {
@@ -63,13 +72,69 @@ function mysql_pdo(array $cfg): PDO
     throw $last ?? new RuntimeException('Unable to connect to MySQL.');
 }
 
-function pdo_options(): array
+function pdo_options(bool $emulatePrepares): array
 {
     return [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
+        // Native prepares add a round-trip per query; Hostinger MySQL feels that latency.
+        PDO::ATTR_EMULATE_PREPARES => $emulatePrepares,
     ];
+}
+
+function schema_version_path(): string
+{
+    return ROOT . '/storage/.schema_version';
+}
+
+function schema_is_current(PDO $pdo): bool
+{
+    if (function_exists('apcu_fetch')) {
+        $ok = false;
+        $cached = apcu_fetch('insp_schema_v', $ok);
+        if ($ok && (int) $cached >= SCHEMA_VERSION) {
+            return true;
+        }
+    }
+
+    $file = schema_version_path();
+    if (is_file($file) && (int) trim((string) file_get_contents($file)) >= SCHEMA_VERSION) {
+        remember_schema_version();
+        return true;
+    }
+
+    try {
+        $stmt = $pdo->query('SELECT version FROM schema_meta LIMIT 1');
+        if ($stmt && (int) $stmt->fetchColumn() >= SCHEMA_VERSION) {
+            remember_schema_version();
+            return true;
+        }
+    } catch (PDOException) {
+        // schema_meta is created the first time migrate runs.
+    }
+
+    return false;
+}
+
+function mark_schema_current(PDO $pdo): void
+{
+    $pdo->exec('CREATE TABLE IF NOT EXISTS schema_meta (version INT NOT NULL)');
+    $pdo->exec('DELETE FROM schema_meta');
+    $pdo->exec('INSERT INTO schema_meta (version) VALUES (' . SCHEMA_VERSION . ')');
+    remember_schema_version();
+}
+
+function remember_schema_version(): void
+{
+    if (function_exists('apcu_store')) {
+        apcu_store('insp_schema_v', SCHEMA_VERSION, 86400);
+    }
+    try {
+        ensure_dir(dirname(schema_version_path()));
+        file_put_contents(schema_version_path(), (string) SCHEMA_VERSION);
+    } catch (Throwable) {
+        // Cache file is optional; schema_meta is the source of truth.
+    }
 }
 
 function migrate_mysql(PDO $pdo): void

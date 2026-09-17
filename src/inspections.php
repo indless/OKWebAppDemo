@@ -53,17 +53,26 @@ function inspection_answers(int $inspectionId): array
 
 function save_answers(int $inspectionId, array $answers): void
 {
-    $sql = 'INSERT INTO inspection_answers (inspection_id, field_key, field_value) VALUES (?, ?, ?)
-            ON CONFLICT(inspection_id, field_key) DO UPDATE SET field_value = excluded.field_value';
-    $driver = db()->getAttribute(PDO::ATTR_DRIVER_NAME);
-    if ($driver === 'mysql') {
-        $sql = 'INSERT INTO inspection_answers (inspection_id, field_key, field_value) VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE field_value = VALUES(field_value)';
+    if ($answers === []) {
+        return;
     }
-    $stmt = db()->prepare($sql);
+
+    $pdo = db();
+    $placeholders = [];
+    $params = [];
     foreach ($answers as $key => $value) {
-        $stmt->execute([$inspectionId, $key, $value]);
+        $placeholders[] = '(?, ?, ?)';
+        array_push($params, $inspectionId, $key, $value);
     }
+
+    $sql = 'INSERT INTO inspection_answers (inspection_id, field_key, field_value) VALUES '
+        . implode(', ', $placeholders);
+    if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+        $sql .= ' ON DUPLICATE KEY UPDATE field_value = VALUES(field_value)';
+    } else {
+        $sql .= ' ON CONFLICT(inspection_id, field_key) DO UPDATE SET field_value = excluded.field_value';
+    }
+    $pdo->prepare($sql)->execute($params);
 }
 
 function list_inspections_for_user(int $userId): array
