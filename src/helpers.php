@@ -25,11 +25,17 @@ function base_url(): string
         return rtrim($configured, '/');
     }
     $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
-    $dir = dirname($script);
-    if ($dir === '/' || $dir === '\\' || $dir === '.') {
+    $dir = str_replace('\\', '/', dirname($script));
+    if ($dir === '/' || $dir === '.' || $dir === '') {
         return '';
     }
-    return rtrim($dir, '/');
+    $prefix = rtrim($dir, '/');
+    $uri = (string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    // Front controller lives in /public, but root .htaccess serves the site at /.
+    if ($prefix === '/public' && !str_starts_with($uri, '/public/') && $uri !== '/public') {
+        return '';
+    }
+    return $prefix;
 }
 
 function url(string $path = '', array $query = []): string

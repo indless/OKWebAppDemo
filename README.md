@@ -54,7 +54,7 @@ Hostinger shared hosting includes **MySQL/MariaDB**, not SQL Server. Python/Flas
 ```
 
 4. Upload the project (FTP, File Manager, or Git). Prefer pointing the domain or subdomain **document root** at the `public/` folder. Keep `src/`, `templates/`, `forms/`, `vendor/`, `storage/`, and `config.php` **outside** the document root.
-5. If you cannot change the document root, upload the whole project into `public_html`. The root `.htaccess` sends traffic to `public/` and blocks `src`, `vendor`, `storage`, and `config.php`.
+5. If you cannot change the document root, upload the whole project into `public_html`. The root `.htaccess` serves the app at `/login` (not `/public/login`) and blocks `src`, `vendor`, `storage`, and `config.php`.
 6. Make `storage/uploads` and `storage/pdfs` writable (755 or 775).
 7. In hPanel, set PHP to **8.2 or 8.3**, and raise `upload_max_filesize` / `post_max_size` to at least **8 MB**.
 8. Enable HTTPS (Hostinger SSL).
