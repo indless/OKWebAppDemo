@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if title is defined %}{{ title }} · {% endif %}{{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url('assets/css/app.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap header-row">
+            <a class="brand" href="{{ url(current_user and current_user.role == 'admin' ? 'admin' : 'home') }}">{{ app_name }}</a>
+            {% if current_user %}
+            <nav class="nav">
+                {% if current_user.role == 'inspector' %}
+                    <a href="{{ url('home') }}">Forms</a>
+                    <a href="{{ url('inspections') }}">My inspections</a>
+                {% else %}
+                    <a href="{{ url('admin') }}">Review queue</a>
+                {% endif %}
+                <span class="who">{{ current_user.display_name }} <em>{{ current_user.role }}</em></span>
+                <form method="post" action="{{ url('logout') }}" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="linkish">Sign out</button>
+                </form>
+            </nav>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="wrap">
+        {% if flash %}
+            <div class="flash flash-{{ flash.type }}" role="status">{{ flash.message }}</div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">Demo inspections app · save to SQL · generate PDF - Created By Nick Hankins</div>
+    </footer>
+    {% block scripts %}{% endblock %}
+    <dialog id="leave-dialog" class="leave-dialog">
+        <h2>Unsaved changes</h2>
+        <p>You have unsaved changes. If you leave now, those changes will be lost.</p>
+        <div class="leave-dialog-actions">
+            <button type="button" class="btn btn-quiet" id="leave-stay">Stay on page</button>
+            <button type="button" class="btn" id="leave-confirm">Leave without saving</button>
+        </div>
+    </dialog>
+    <script src="{{ url('assets/js/unsaved.js') }}"></script>
+</body>
+</html>

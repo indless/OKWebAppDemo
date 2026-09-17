@@ -1,0 +1,14 @@
+{
+    "name": "okwebappdemo/inspections",
+    "description": "Field inspections demo with HTML forms, MySQL persistence, and PDF reports",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "twig/twig": "^3.11",
+        "dompdf/dompdf": "^3.1"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

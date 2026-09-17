@@ -1,0 +1,46 @@
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Form</th>
+                <th>Summary</th>
+                {% if show_inspector %}
+                    <th>Inspector</th>
+                {% endif %}
+                <th>Status</th>
+                {% if show_age %}
+                    <th>Age</th>
+                {% endif %}
+                <th>Updated</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in inspections %}
+                {% set form = forms[row.form_key] ?? { title: row.form_key } %}
+                <tr>
+                    <td class="num">{{ row.id }}</td>
+                    <td>{{ form.title }}</td>
+                    <td>{{ row.summary }}</td>
+                    {% if show_inspector %}
+                        <td>{{ row.inspector_name }}</td>
+                    {% endif %}
+                    <td><span class="badge badge-{{ row.status }}">{{ status_label(row.status) }}</span></td>
+                    {% if show_age %}
+                        <td class="num{% if row.age_days is not null %} age-waiting{% endif %}">{{ row.age_label }}</td>
+                    {% endif %}
+                    <td>{{ format_datetime(row.submitted_at ?: row.created_at) }}</td>
+                    <td class="actions">
+                        {% if current_user.role == 'inspector' %}
+                            <a href="{{ url('inspections/' ~ row.id ~ '/edit') }}">Edit</a>
+                        {% endif %}
+                        {% if row.status != 'draft' %}
+                            <a href="{{ url('inspections/' ~ row.id) }}">View</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

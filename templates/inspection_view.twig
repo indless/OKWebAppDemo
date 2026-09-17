@@ -1,0 +1,73 @@
+{% extends 'layout.twig' %}
+{% set title = 'Inspection #' ~ inspection.id %}
+
+{% block content %}
+<div class="form-heading">
+    <p class="eyebrow">Inspection #{{ inspection.id }}</p>
+    <h1>{{ form.title }}</h1>
+    <p>
+        <span class="badge badge-{{ inspection.status }}">{{ status_label(inspection.status) }}</span>
+        · Inspector {{ inspection.inspector_name }}
+        · Created {{ format_datetime(inspection.created_at) }}
+        {% if inspection.submitted_at %}· Submitted {{ format_datetime(inspection.submitted_at) }}{% endif %}
+        {% if inspection.reviewed_at %}· Reviewed {{ format_datetime(inspection.reviewed_at) }}{% if inspection.reviewer_name %} by {{ inspection.reviewer_name }}{% endif %}{% endif %}
+    </p>
+    <p class="lede">{{ title_text }}</p>
+</div>
+
+{% include 'partials/admin_notes.twig' %}
+
+<div class="toolbar">
+    {% if can_edit %}
+        <a class="btn" href="{{ url('inspections/' ~ inspection.id ~ '/edit') }}">Edit submission</a>
+    {% endif %}
+    {% if inspection.pdf_path %}
+        <a class="btn btn-quiet" href="{{ url('inspections/' ~ inspection.id ~ '/pdf') }}">Download PDF</a>
+    {% endif %}
+    <a href="{{ url(is_admin ? 'admin' : 'inspections') }}">Back to list</a>
+</div>
+
+{% for section in form.sections %}
+    <section class="card section">
+        <h2>{{ section.title }}</h2>
+        <dl class="readout">
+            {% for field in section.fields %}
+                <div>
+                    <dt>{{ field.label }}</dt>
+                    <dd>
+                        {% set value = answers[field.key] ?? '' %}
+                        {% if field.type == 'signature' and value %}
+                            <img class="signature-preview" src="{{ value }}" alt="Signature">
+                        {% elseif (field.type == 'checklist' or field.type == 'rating' or field.type == 'select') and value %}
+                            <span class="pill pill-{{ value }}">{{ option_label(field, value) }}</span>
+                            {% if field.notes and answers[field.key ~ '_notes'] %}
+                                <div class="note">{{ answers[field.key ~ '_notes'] }}</div>
+                            {% endif %}
+                        {% elseif value %}
+                            {{ value|nl2br_e }}
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            {% endfor %}
+        </dl>
+    </section>
+{% endfor %}
+
+{% if attachments %}
+    <section class="card section">
+        <h2>Attachments</h2>
+        <ul class="thumb-list">
+            {% for file in attachments %}
+                <li>
+                    <a href="{{ url('attachments/' ~ file.id) }}">
+                        <img src="{{ url('attachments/' ~ file.id) }}" alt="{{ file.original_name }}">
+                    </a>
+                    <span>{{ file.original_name }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endif %}
+{% endblock %}

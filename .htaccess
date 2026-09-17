@@ -1,0 +1,11 @@
+# If the Hostinger document root is the project folder (not public/),
+# send traffic into public/ and block direct access to app internals.
+
+RewriteEngine On
+
+RewriteRule ^(src|templates|forms|sql|storage|vendor|config\.php|config\.example\.php) - [F,L]
+
+RewriteRule ^$ public/ [L]
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ public/$1 [L]

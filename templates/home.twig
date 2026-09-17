@@ -1,0 +1,28 @@
+{% extends 'layout.twig' %}
+{% set title = 'Forms' %}
+
+{% block content %}
+<h1>Start an inspection</h1>
+<p class="lede">Choose a form, fill it in the field, save a draft, then submit to store answers and generate a PDF.</p>
+
+<div class="form-cards">
+    {% for form in form_list %}
+        <article class="card">
+            <h2>{{ form.title }}</h2>
+            <p>{{ form.description }}</p>
+            <form method="post" action="{{ url('inspections/new') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="form_key" value="{{ form.key }}">
+                <button type="submit" class="btn">Start {{ form.title }}</button>
+            </form>
+        </article>
+    {% endfor %}
+</div>
+
+<h2 class="section-title">Recent inspections</h2>
+{% if inspections is empty %}
+    <p class="muted">No inspections yet.</p>
+{% else %}
+    {% include 'partials/inspection_table.twig' with { inspections: inspections, forms: forms, show_inspector: false } %}
+{% endif %}
+{% endblock %}

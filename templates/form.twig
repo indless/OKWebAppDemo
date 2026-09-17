@@ -1,0 +1,125 @@
+{% extends 'layout.twig' %}
+{% set title = form.title %}
+
+{% block content %}
+<div class="form-heading">
+    <p class="eyebrow">{% if inspection.status == 'draft' %}Draft{% else %}Editing submission{% endif %} #{{ inspection.id }}</p>
+    <h1>{{ form.title }}</h1>
+    <p class="lede">
+        {{ form.description }}
+        {% if inspection.status == 'draft' %}
+            Save a draft any time. Submit when the inspection is complete — that stores answers and builds the PDF.
+        {% elseif inspection.status == 'needs_info' %}
+            An admin requested more information. Address the comment below, then submit again. The admin comment is not included in the PDF.
+        {% else %}
+            Update answers or photos, then submit again to replace the stored PDF.
+            {% if inspection.status == 'reviewed' %} Saving changes will send this back to the admin review queue.{% endif %}
+        {% endif %}
+    </p>
+</div>
+
+<div class="toolbar">
+    <a href="{{ url('inspections') }}">Back to list</a>
+    <a href="{{ url(cancel_url) }}">Cancel</a>
+</div>
+
+{% if inspection.admin_comment %}
+    <section class="card section admin-notes admin-notes-readonly">
+        <h2>Admin comment</h2>
+        <p class="admin-note-body">{{ inspection.admin_comment|nl2br_e }}</p>
+    </section>
+{% endif %}
+
+<form method="post" action="{{ url('inspections/' ~ inspection.id ~ '/edit') }}" enctype="multipart/form-data" class="inspect-form" id="inspect-form" data-unsaved-guard novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    {% for section in form.sections %}
+        <section class="card section">
+            <h2>{{ section.title }}</h2>
+            {% for field in section.fields %}
+                {% set value = answers[field.key] ?? '' %}
+                <div class="field" data-field-key="{{ field.key }}">
+                    <span class="label">
+                        {{ field.label }}
+                        {% if field.required %}<abbr title="required">*</abbr>{% endif %}
+                    </span>
+
+                    {% if field.type == 'text' %}
+                        <input type="text" name="{{ field.key }}" value="{{ value }}" {% if field.required %}data-required="1"{% endif %}>
+                    {% elseif field.type == 'textarea' %}
+                        <textarea name="{{ field.key }}" rows="4" {% if field.required %}data-required="1"{% endif %}>{{ value }}</textarea>
+                    {% elseif field.type == 'date' %}
+                        <input type="date" name="{{ field.key }}" value="{{ value }}" {% if field.required %}data-required="1"{% endif %}>
+                    {% elseif field.type == 'select' %}
+                        <select name="{{ field.key }}" {% if field.required %}data-required="1"{% endif %}>
+                            <option value="">Select…</option>
+                            {% for option in field.options %}
+                                <option value="{{ option.value }}" {% if value == option.value %}selected{% endif %}>{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    {% elseif field.type == 'checklist' or field.type == 'rating' %}
+                        <div class="choice-row" {% if field.required %}data-required-group="{{ field.key }}"{% endif %}>
+                            {% for option in field.options %}
+                                <label class="choice choice-{{ option.value }}">
+                                    <input type="radio" name="{{ field.key }}" value="{{ option.value }}" {% if value == option.value %}checked{% endif %}>
+                                    {{ option.label }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% if field.notes %}
+                            <input type="text" name="{{ field.key }}_notes" value="{{ answers[field.key ~ '_notes'] ?? '' }}" placeholder="Notes (optional)">
+                        {% endif %}
+                    {% elseif field.type == 'signature' %}
+                        <div class="signature-block">
+                            <canvas id="signature-pad" width="640" height="180" aria-label="Signature pad"></canvas>
+                            <input type="hidden" name="{{ field.key }}" id="signature-data" value="{{ value }}" {% if field.required %}data-required="1"{% endif %}>
+                            <div class="signature-actions">
+                                <button type="button" class="btn btn-quiet" id="signature-clear">Clear signature</button>
+                                <span class="muted" id="signature-status">{% if value %}Signature on file. Draw again to replace.{% else %}Sign with mouse or finger.{% endif %}</span>
+                            </div>
+                            {% if value %}
+                                <img class="signature-preview" src="{{ value }}" alt="Saved signature">
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </section>
+    {% endfor %}
+
+    {% if form.attachments %}
+        <section class="card section">
+            <h2>{{ form.attachments.label }}</h2>
+            <p class="muted">{{ form.attachments.help }}</p>
+            {% if attachments %}
+                <ul class="thumb-list existing-photos">
+                    {% for file in attachments %}
+                        <li>
+                            <img src="{{ url('attachments/' ~ file.id) }}" alt="{{ file.original_name }}">
+                            <label class="remove">
+                                <input type="checkbox" name="delete_attachments[]" value="{{ file.id }}">
+                                Remove
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <input type="file" name="photos[]" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple data-max="{{ form.attachments.max }}" data-existing="{{ attachments|length }}">
+            <div id="photo-previews" class="thumb-list"></div>
+        </section>
+    {% endif %}
+
+    <div class="form-actions">
+        <a class="btn btn-quiet" href="{{ url(cancel_url) }}">Cancel</a>
+        <a href="{{ url('inspections') }}">Back to list</a>
+        <button type="submit" name="action" value="draft" class="btn btn-quiet">Save draft</button>
+        <button type="submit" name="action" value="submit" class="btn" id="submit-inspection">
+            {% if inspection.status == 'draft' %}Submit inspection{% else %}Save and update PDF{% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url('assets/js/form.js') }}"></script>
+{% endblock %}

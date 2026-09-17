@@ -1,0 +1,11 @@
+{% extends 'layout.twig' %}
+{% set title = 'My inspections' %}
+
+{% block content %}
+<h1>My inspections</h1>
+{% if inspections is empty %}
+    <p class="muted">You have not started any inspections yet. <a href="{{ url('home') }}">Choose a form</a>.</p>
+{% else %}
+    {% include 'partials/inspection_table.twig' with { inspections: inspections, forms: forms, show_inspector: false } %}
+{% endif %}
+{% endblock %}

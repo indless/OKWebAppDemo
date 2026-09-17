@@ -1,0 +1,183 @@
+{
+    "key": "safety",
+    "title": "Field Safety Inspection",
+    "description": "Walk the site and record pass / fail findings. Attach photos of hazards or deficiencies.",
+    "attachments": {
+        "max": 3,
+        "label": "Photos of findings",
+        "help": "JPEG, PNG, or WebP. Up to 3 photos, 5 MB each."
+    },
+    "sections": [
+        {
+            "title": "Site details",
+            "fields": [
+                {
+                    "key": "inspection_date",
+                    "label": "Inspection date",
+                    "type": "date",
+                    "required": true
+                },
+                {
+                    "key": "site_name",
+                    "label": "Site name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "location",
+                    "label": "Location / address",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "weather",
+                    "label": "Weather",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        { "value": "clear", "label": "Clear" },
+                        { "value": "rain", "label": "Rain" },
+                        { "value": "snow", "label": "Snow" },
+                        { "value": "wind", "label": "High wind" },
+                        { "value": "other", "label": "Other" }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Safety checklist",
+            "fields": [
+                {
+                    "key": "ppe",
+                    "label": "Personal protective equipment in use",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "housekeeping",
+                    "label": "Housekeeping / walkways clear",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "fall_protection",
+                    "label": "Fall protection",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "electrical",
+                    "label": "Electrical hazards controlled",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "fire_safety",
+                    "label": "Fire extinguishers / exits",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "ladders",
+                    "label": "Ladders and scaffolding",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "vehicles",
+                    "label": "Vehicle and equipment staging",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "first_aid",
+                    "label": "First aid kit accessible",
+                    "type": "checklist",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "pass", "label": "Pass" },
+                        { "value": "fail", "label": "Fail" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Summary",
+            "fields": [
+                {
+                    "key": "overall_status",
+                    "label": "Overall status",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        { "value": "satisfactory", "label": "Satisfactory" },
+                        { "value": "needs_attention", "label": "Needs attention" },
+                        { "value": "unsafe", "label": "Unsafe — stop work" }
+                    ]
+                },
+                {
+                    "key": "comments",
+                    "label": "Additional comments",
+                    "type": "textarea",
+                    "required": false
+                },
+                {
+                    "key": "inspector_name",
+                    "label": "Inspector name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "signature",
+                    "label": "Inspector signature",
+                    "type": "signature",
+                    "required": true
+                }
+            ]
+        }
+    ]
+}

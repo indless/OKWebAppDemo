@@ -1,0 +1,176 @@
+{
+    "key": "equipment",
+    "title": "Equipment Inspection",
+    "description": "Record equipment condition before use. Attach photos of defects.",
+    "attachments": {
+        "max": 3,
+        "label": "Photos of defects",
+        "help": "JPEG, PNG, or WebP. Up to 3 photos, 5 MB each."
+    },
+    "sections": [
+        {
+            "title": "Equipment details",
+            "fields": [
+                {
+                    "key": "inspection_date",
+                    "label": "Inspection date",
+                    "type": "date",
+                    "required": true
+                },
+                {
+                    "key": "equipment_id",
+                    "label": "Equipment ID",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "equipment_name",
+                    "label": "Equipment name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "equipment_type",
+                    "label": "Type",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        { "value": "vehicle", "label": "Vehicle" },
+                        { "value": "generator", "label": "Generator" },
+                        { "value": "lift", "label": "Lift / aerial" },
+                        { "value": "power_tool", "label": "Power tool" },
+                        { "value": "other", "label": "Other" }
+                    ]
+                },
+                {
+                    "key": "hours_mileage",
+                    "label": "Hours / mileage",
+                    "type": "text",
+                    "required": false
+                }
+            ]
+        },
+        {
+            "title": "Condition ratings",
+            "fields": [
+                {
+                    "key": "tires_or_base",
+                    "label": "Tires / base / mounting",
+                    "type": "rating",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "good", "label": "Good" },
+                        { "value": "fair", "label": "Fair" },
+                        { "value": "poor", "label": "Poor" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "lights_or_indicators",
+                    "label": "Lights / indicators / gauges",
+                    "type": "rating",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "good", "label": "Good" },
+                        { "value": "fair", "label": "Fair" },
+                        { "value": "poor", "label": "Poor" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "brakes_or_guards",
+                    "label": "Brakes / guards / stops",
+                    "type": "rating",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "good", "label": "Good" },
+                        { "value": "fair", "label": "Fair" },
+                        { "value": "poor", "label": "Poor" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "hydraulics_or_moving",
+                    "label": "Hydraulics / moving parts",
+                    "type": "rating",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "good", "label": "Good" },
+                        { "value": "fair", "label": "Fair" },
+                        { "value": "poor", "label": "Poor" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "fluids_leaks",
+                    "label": "Fluids / leaks",
+                    "type": "rating",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "good", "label": "Good" },
+                        { "value": "fair", "label": "Fair" },
+                        { "value": "poor", "label": "Poor" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                },
+                {
+                    "key": "safety_devices",
+                    "label": "Safety devices / labels",
+                    "type": "rating",
+                    "required": true,
+                    "notes": true,
+                    "options": [
+                        { "value": "good", "label": "Good" },
+                        { "value": "fair", "label": "Fair" },
+                        { "value": "poor", "label": "Poor" },
+                        { "value": "na", "label": "N/A" }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Disposition",
+            "fields": [
+                {
+                    "key": "defects",
+                    "label": "Defects found",
+                    "type": "textarea",
+                    "required": false
+                },
+                {
+                    "key": "service_decision",
+                    "label": "Service decision",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        { "value": "in_service", "label": "In service" },
+                        { "value": "out_of_service", "label": "Out of service — do not use" }
+                    ]
+                },
+                {
+                    "key": "comments",
+                    "label": "Additional comments",
+                    "type": "textarea",
+                    "required": false
+                },
+                {
+                    "key": "inspector_name",
+                    "label": "Inspector name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "signature",
+                    "label": "Inspector signature",
+                    "type": "signature",
+                    "required": true
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{% if is_admin %}
+    <section class="card section admin-notes">
+        <h2>Admin comment</h2>
+        <p class="muted">Visible to the inspector when it has a value. Not included in the generated PDF.</p>
+        <form method="post" action="{{ url('admin/inspections/' ~ inspection.id ~ '/notes') }}" class="stack" data-unsaved-guard>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label>
+                Notes for this submission
+                <textarea name="admin_comment" rows="4" placeholder="Request a photo, ask for a missing rating, or record a rejection reason.">{{ inspection.admin_comment }}</textarea>
+            </label>
+            <div class="toolbar">
+                <button type="submit" name="action" value="save" class="btn btn-quiet">Save comment</button>
+                {% if inspection.status in ['submitted', 'reviewed'] %}
+                    <button type="submit" name="action" value="needs_info" class="btn btn-warn">Request more info</button>
+                {% endif %}
+                {% if inspection.status in ['submitted', 'needs_info'] %}
+                    <button type="submit" name="action" value="review" class="btn">Mark reviewed</button>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+{% elseif inspection.admin_comment %}
+    <section class="card section admin-notes admin-notes-readonly">
+        <h2>Admin comment</h2>
+        <p class="admin-note-body">{{ inspection.admin_comment|nl2br_e }}</p>
+        {% if inspection.commenter_name or inspection.admin_comment_at %}
+            <p class="muted">
+                {% if inspection.commenter_name %}From {{ inspection.commenter_name }}{% endif %}
+                {% if inspection.admin_comment_at %} · {{ format_datetime(inspection.admin_comment_at) }}{% endif %}
+            </p>
+        {% endif %}
+    </section>
+{% endif %}

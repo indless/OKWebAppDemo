@@ -1,0 +1,59 @@
+{% extends 'layout.twig' %}
+{% set title = 'Review queue' %}
+
+{% block content %}
+<h1>Review queue</h1>
+<p class="lede">Submitted inspections wait for review. Return a form with an admin comment when you need more information. Comments are not written into the PDF.</p>
+
+<section class="card queue-summary" aria-labelledby="queue-summary-heading">
+    <div>
+        <p class="eyebrow">Queue status</p>
+        <h2 id="queue-summary-heading">Submitted, needs info, reviewed</h2>
+        <p class="muted">{{ stats.total }} inspection{% if stats.total != 1 %}s{% endif %} in the review queue.</p>
+        <ul class="queue-legend">
+            <li>
+                <span class="swatch swatch-submitted"></span>
+                <strong>{{ stats.submitted }}</strong>
+                Submitted
+                <span class="muted">{{ stats.submitted_pct }}%</span>
+            </li>
+            <li>
+                <span class="swatch swatch-needs-info"></span>
+                <strong>{{ stats.needs_info }}</strong>
+                Needs info
+                <span class="muted">{{ stats.needs_info_pct }}%</span>
+            </li>
+            <li>
+                <span class="swatch swatch-reviewed"></span>
+                <strong>{{ stats.reviewed }}</strong>
+                Reviewed
+                <span class="muted">{{ stats.reviewed_pct }}%</span>
+            </li>
+        </ul>
+    </div>
+    <svg class="queue-pie" viewBox="0 0 160 160" role="img" aria-label="{{ stats.submitted }} submitted, {{ stats.needs_info }} needs info, {{ stats.reviewed }} reviewed">
+        {% if stats.is_empty %}
+            <circle cx="80" cy="80" r="72" fill="#e6e1d4"></circle>
+        {% elseif stats.full == 'submitted' %}
+            <circle cx="80" cy="80" r="72" fill="#4a90a4"></circle>
+        {% elseif stats.full == 'needs_info' %}
+            <circle cx="80" cy="80" r="72" fill="#c45c26"></circle>
+        {% elseif stats.full == 'reviewed' %}
+            <circle cx="80" cy="80" r="72" fill="#2d6a4f"></circle>
+        {% else %}
+            {% if stats.submitted > 0 %}<path d="{{ stats.submitted_path }}" fill="#4a90a4"></path>{% endif %}
+            {% if stats.needs_info > 0 %}<path d="{{ stats.needs_info_path }}" fill="#c45c26"></path>{% endif %}
+            {% if stats.reviewed > 0 %}<path d="{{ stats.reviewed_path }}" fill="#2d6a4f"></path>{% endif %}
+        {% endif %}
+        <circle cx="80" cy="80" r="40" fill="#fffdf7"></circle>
+        <text x="80" y="76" text-anchor="middle" class="pie-total">{{ stats.total }}</text>
+        <text x="80" y="96" text-anchor="middle" class="pie-total-label">total</text>
+    </svg>
+</section>
+
+{% if inspections is empty %}
+    <p class="muted">No submitted inspections yet.</p>
+{% else %}
+    {% include 'partials/inspection_table.twig' with { inspections: inspections, forms: forms, show_inspector: true, show_age: true } %}
+{% endif %}
+{% endblock %}

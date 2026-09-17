@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { margin: 28px 32px 48px 32px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1c2b24; }
+        h1 { font-size: 18px; margin: 0 0 4px; }
+        h2 { font-size: 13px; margin: 16px 0 8px; border-bottom: 1px solid #c45c26; padding-bottom: 3px; }
+        .meta { color: #44554c; margin-bottom: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        th, td { border: 1px solid #cfc8bb; padding: 5px 7px; vertical-align: top; text-align: left; }
+        th { background: #f3efe6; width: 38%; font-weight: 600; }
+        .banner { background: #1c2b24; color: #f7f3ea; padding: 12px 14px; margin-bottom: 12px; }
+        .banner small { color: #d9c7b0; }
+        .status { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+        .photos img { width: 230px; max-height: 170px; margin: 6px 8px 6px 0; border: 1px solid #cfc8bb; }
+        .sig { max-width: 280px; height: auto; border-bottom: 1px solid #1c2b24; }
+        .page-footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: -28px;
+            font-size: 9px;
+            color: #66756c;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h1>{{ form.title }}</h1>
+        <small>Inspection #{{ inspection.id }} · {{ inspection.inspector_name }} · {{ inspection.submitted_at }}</small>
+    </div>
+    <p class="meta">Status: <span class="status">{{ inspection.status }}</span></p>
+
+    {% for section in form.sections %}
+        <h2>{{ section.title }}</h2>
+        <table>
+            {% for field in section.fields %}
+                <tr>
+                    <th>{{ field.label }}</th>
+                    <td>
+                        {% set value = answers[field.key] ?? '' %}
+                        {% if field.type == 'signature' and value %}
+                            <img class="sig" src="{{ value }}" alt="Signature">
+                        {% elseif (field.type == 'checklist' or field.type == 'rating' or field.type == 'select') and value %}
+                            {{ option_label(field, value) }}
+                            {% if field.notes and answers[field.key ~ '_notes'] %}
+                                <br>{{ answers[field.key ~ '_notes'] }}
+                            {% endif %}
+                        {% else %}
+                            {{ value|nl2br_e }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+
+    {% if photos %}
+        <h2>Attached photos</h2>
+        <div class="photos">
+            {% for photo in photos %}
+                <img src="{{ photo.src }}" alt="{{ photo.name }}">
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="page-footer">Generated {{ generated_at }} from stored inspection data.</div>
+</body>
+</html>

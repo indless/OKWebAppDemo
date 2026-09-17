@@ -1,0 +1,11 @@
+/config.php
+/storage/app.sqlite
+/storage/app.sqlite-journal
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+!/storage/uploads/.htaccess
+/storage/pdfs/*
+!/storage/pdfs/.gitkeep
+!/storage/pdfs/.htaccess
+/tools/
+/.phpunit.cache
